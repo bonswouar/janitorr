@@ -247,7 +247,7 @@ class SonarrRestService(
     private fun deleteEmptyShows(affectedShows: List<SeriesPayload>) {
 
         if (!sonarrProperties.deleteEmptyShows) {
-            log.info("Feature turned off - not deleting any TV shows without files or monitoring")
+            log.debug("Feature turned off - not deleting any TV shows without files or monitoring")
             return
         }
 

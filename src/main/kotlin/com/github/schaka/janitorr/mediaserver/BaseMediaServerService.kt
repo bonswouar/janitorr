@@ -211,7 +211,10 @@ abstract class BaseMediaServerService(
     protected abstract fun addPathToLibrary(leavingSoonCollection: VirtualFolderResponse, pathForMediaServer: String)
 
     override fun updateLeavingSoon(cleanupType: CleanupType, libraryType: LibraryType, items: List<LibraryItem>, onlyAddLinks: Boolean) {
-
+        // TMP skip if tv show
+        if (libraryType == LibraryType.TV_SHOWS) {
+            return
+        }
         // Only do this, if we can get access to the file system to create a link structure
         if (!fileSystemProperties.access || fileSystemProperties.leavingSoonDir == null) {
             return

@@ -20,17 +20,7 @@ on:
     tags:
       - '**'
     branches:
-      - 'develop'
-
-  pull_request:
-    paths:
-      - src/**
-      - buildSrc/**
-      - .github/**
-      - build.gradle.kts
-      - settings.gradle.kts
-    branches:
-      - '**'
+      - 'main'
 
 jobs:
   build:
@@ -114,10 +104,9 @@ jobs:
         uses: int128/docker-manifest-create-action@v2
         with:
           push: true
-          tags: | 
-            ghcr.io/schaka/janitorr:native-${{ steps.branch_name.outputs.value }}
-            ${{ (startsWith(github.ref, 'refs/tags/v') && 'ghcr.io/schaka/janitorr:native-stable') || '' }}
-          sources: | 
-            ghcr.io/schaka/janitorr:native-amd64-${{ steps.branch_name.outputs.value }}
-            ghcr.io/schaka/janitorr:native-arm64-${{ steps.branch_name.outputs.value }}
-          
+          tags: |
+            ghcr.io/bonswouar/janitorr:native-${{ steps.branch_name.outputs.value }}
+            ${{ (startsWith(github.ref, 'refs/tags/v') && 'ghcr.io/bonswouar/janitorr:native-stable') || '' }}
+          sources: |
+            ghcr.io/bonswouar/janitorr:native-amd64-${{ steps.branch_name.outputs.value }}
+            ghcr.io/bonswouar/janitorr:native-arm64-${{ steps.branch_name.outputs.value }}
