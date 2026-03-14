@@ -36,7 +36,7 @@ class MediaCleanupScheduleTest {
     lateinit var radarrService: ServarrService
 
     @Test
-    fun determineLeavingSoonDurationUsesOffsetThreshold() {
+    fun `Leaving Soon uses threshold offset in calculation`() {
         val fileSystemProperties = FileSystemProperties(
             access = true,
             leavingSoonDir = "/data/media/leaving-soon",
@@ -85,7 +85,7 @@ class MediaCleanupScheduleTest {
     }
 
     @Test
-    fun determineLeavingSoonDurationIsZeroWhenOffsetIsDisabled() {
+    fun `Duration is default when offset is disabled`() {
         val fileSystemProperties = FileSystemProperties(
             access = true,
             leavingSoonDir = "/data/media/leaving-soon",
@@ -118,7 +118,7 @@ class MediaCleanupScheduleTest {
     }
 
     @Test
-    fun determineLeavingSoonDurationIsMaximumDurationWithoutFilesystemAccess() {
+    fun `Duration is maximum if file access is disabled`() {
         val fileSystemProperties = FileSystemProperties(
             access = false,
             leavingSoonDir = "/data/media/leaving-soon",

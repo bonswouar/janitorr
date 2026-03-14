@@ -57,7 +57,7 @@ internal class FavoritesTest {
     )
 
     @Test
-    fun testGetAllFavoritedItems_whenMediaServerDisabled_returnsEmptyList() {
+    fun `No favorites are returned when media server is disabled`() {
         every { jellyfinProperties.enabled } returns false
         every { jellyfinProperties.excludeFavorited } returns true
 
@@ -67,7 +67,7 @@ internal class FavoritesTest {
     }
 
     @Test
-    fun testGetAllFavoritedItems_withMultipleUsers_aggregatesAllFavorites() {
+    fun `Favorites are correctly aggregated across multiple users`() {
         every { jellyfinProperties.enabled } returns true
         every { jellyfinProperties.excludeFavorited } returns true
 
@@ -104,7 +104,7 @@ internal class FavoritesTest {
     }
 
     @Test
-    fun testGetAllFavoritedItems_whenUserApiFails_continuesWithOtherUsers() {
+    fun `Graceful failure per user is guaranteed`() {
         every { jellyfinProperties.enabled } returns true
         every { jellyfinProperties.excludeFavorited } returns true
 
@@ -128,7 +128,7 @@ internal class FavoritesTest {
     }
 
     @Test
-    fun testGetAllFavoritedItems_whenNoUsers_returnsEmptyList() {
+    fun `No favorites are returned if none are available at the server`() {
         every { jellyfinProperties.enabled } returns true
         every { jellyfinProperties.excludeFavorited } returns true
         every { mediaServerClient.listUsers() } returns emptyList()
@@ -139,7 +139,7 @@ internal class FavoritesTest {
     }
 
     @Test
-    fun when_item_is_favorited_filter_out_by_imdb() {
+    fun `Items are filtered out by IMDB if favorited`() {
         val item = LibraryItem(
             1,
             LocalDateTime.now(),
@@ -179,7 +179,7 @@ internal class FavoritesTest {
     }
 
     @Test
-    fun when_item_is_favorited_filter_out_by_tmdb() {
+    fun `Items are filtered out by TMDB if favorited`() {
         val item = LibraryItem(
             1,
             LocalDateTime.now(),
@@ -220,7 +220,7 @@ internal class FavoritesTest {
     }
 
     @Test
-    fun when_item_is_favorited_filter_out_by_tvdb() {
+    fun `Items are filtered out by TVDB if favorited`() {
         val item = LibraryItem(
             1,
             LocalDateTime.now(),
