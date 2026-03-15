@@ -36,20 +36,20 @@ class AbstractCleanupScheduleTest {
     lateinit var radarrService: ServarrService
 
     @Test
-    fun scheduleDeleteUpdatesLeavingSoonWithoutDeleting() {
+    fun `Leaving Soon runs independently of deletion`() {
         val now = LocalDateTime.now()
         val olderItem = LibraryItem(
             id = 1,
-            importedDate = now.minusDays(11),
+            importedDate = now.minusDays(25),
             originalPath = "/data/media/movies/Movie (2024)/Movie.mkv",
             libraryPath = "/data/media/movies/Movie (2024)/Movie.mkv",
             parentPath = "/data/media/movies/Movie (2024)",
             rootFolderPath = "/data/media/movies",
             filePath = "/data/media/movies/Movie (2024)/Movie.mkv"
         )
-        val newerItem = LibraryItem(
+        val tooNewForLeavingSoon = LibraryItem(
             id = 2,
-            importedDate = now.minusDays(9),
+            importedDate = now.minusDays(19),
             originalPath = "/data/media/movies/Movie 2 (2024)/Movie2.mkv",
             libraryPath = "/data/media/movies/Movie 2 (2024)/Movie2.mkv",
             parentPath = "/data/media/movies/Movie 2 (2024)",
@@ -57,13 +57,13 @@ class AbstractCleanupScheduleTest {
             filePath = "/data/media/movies/Movie 2 (2024)/Movie2.mkv"
         )
 
-        every { radarrService.getEntries() } returns listOf(olderItem, newerItem)
-        every { mediaServerService.filterOutFavorites(any(), any()) } returns listOf(olderItem, newerItem)
+        every { radarrService.getEntries() } returns listOf(olderItem, tooNewForLeavingSoon)
+        every { mediaServerService.filterOutFavorites(any(), any()) } answers { firstArg() }
 
         val schedule = buildSchedule(
             shouldDelete = false,
-            leavingSoonDuration = Duration.ofDays(10),
-            leavingSoonWindow = Duration.ofDays(2)
+            leavingSoonDeletionDuration = Duration.ofDays(30),
+            leavingSoonWindow = Duration.ofDays(10)
         )
 
         schedule.exposeScheduleDelete(LibraryType.MOVIES, Duration.ofDays(30))
@@ -82,10 +82,10 @@ class AbstractCleanupScheduleTest {
     }
 
     @Test
-    fun scheduleDeleteSkipsWorkWhenNoDeletionAndNoLeavingSoon() {
+    fun `Deletion is skipped when no deletion and leaving soon are required`() {
         val schedule = buildSchedule(
             shouldDelete = false,
-            leavingSoonDuration = FOREVER.duration,
+            leavingSoonDeletionDuration = FOREVER.duration,
             leavingSoonWindow = Duration.ofDays(2)
         )
 
@@ -98,7 +98,7 @@ class AbstractCleanupScheduleTest {
 
     private fun buildSchedule(
         shouldDelete: Boolean,
-        leavingSoonDuration: Duration,
+        leavingSoonDeletionDuration: Duration,
         leavingSoonWindow: Duration
     ): TestCleanupSchedule {
         val fileSystemProperties = FileSystemProperties(
@@ -126,7 +126,7 @@ class AbstractCleanupScheduleTest {
             sonarrService,
             radarrService,
             shouldDelete,
-            leavingSoonDuration
+            leavingSoonDeletionDuration
         )
     }
 

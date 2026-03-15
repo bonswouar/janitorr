@@ -48,6 +48,12 @@ class WeeklyEpisodeCleanupSchedule(
         val series = sonarrClient.getAllSeries().filter { it.tags.contains(episodeTag.id) }
 
         for (show in series) {
+
+            if (show.seasons.isEmpty()) {
+                log.warn("No seasons found for ${show.cleanTitle} - ID: ${show.id}")
+                continue
+            }
+
             val latestSeason = show.seasons.maxBy { season -> season.seasonNumber }
             deleteOlderSeasons(show, latestSeason)
 

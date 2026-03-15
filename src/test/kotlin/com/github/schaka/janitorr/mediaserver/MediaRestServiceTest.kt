@@ -1,5 +1,6 @@
 package com.github.schaka.janitorr.mediaserver
 
+import com.github.schaka.janitorr.cleanup.CleanupType
 import com.github.schaka.janitorr.config.ApplicationProperties
 import com.github.schaka.janitorr.config.FileSystemProperties
 import com.github.schaka.janitorr.mediaserver.jellyfin.JellyfinProperties
@@ -169,7 +170,9 @@ internal class MediaRestServiceTest {
 
         )
 
-        val path = Path.of(fileSystemProperties.leavingSoonDir, "tv", "media")
+        val libraryType = LibraryType.TV_SHOWS
+        val cleanupType = CleanupType.MEDIA
+        val path = Path.of(fileSystemProperties.leavingSoonDir, libraryType.folderName, cleanupType.folderName)
         val structure = jellyfinRestService.pathStructure(episode, path)
 
         assertEquals(Path.of("/data/media/tv/tv-show [imdb-812543]"), structure.sourceFolder)

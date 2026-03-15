@@ -77,8 +77,9 @@ abstract class AbstractCleanupSchedule(
         val today = LocalDateTime.now()
         val needToDelete = deletionExpiration != FOREVER.duration
         val needLeavingSoon = leavingSoonExpiration != FOREVER.duration
+        val leavingSoonDayOffset = applicationProperties.leavingSoon.toDays()
         val deletionExpirationDays = if (needToDelete) deletionExpiration.toDays() else HUNDRED_YEARS
-        val leavingSoonExpirationDays = if (needLeavingSoon) leavingSoonExpiration.toDays() else HUNDRED_YEARS
+        val leavingSoonExpirationDays = if (needLeavingSoon) leavingSoonExpiration.minusDays(leavingSoonDayOffset).toDays() else HUNDRED_YEARS
 
         if (!needToDelete && !needLeavingSoon) {
             return

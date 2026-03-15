@@ -47,14 +47,19 @@ class MediaCleanupSchedule(
         val movieExpiration = determineDeletionDuration(applicationProperties.mediaDeletion.movieExpiration, freeSpacePercentage)
         log.debug("Cleaning up movies older than ${movieExpiration.toDays()}")
 
+        if (applicationProperties.leavingSoon >= seasonExpiration || applicationProperties.leavingSoon >= movieExpiration) {
+            log.error("Leaving Soon Offset is set higher than expiration times. The math doesn't math. Correct your configuration and try again.")
+            return
+        }
+
         val leavingSoonFreeSpacePercentage = freeSpacePercentage - applicationProperties.leavingSoonThresholdOffsetPercent
         val seasonLeavingSoonExpiration = determineDeletionDuration(applicationProperties.mediaDeletion.seasonExpiration, leavingSoonFreeSpacePercentage)
         log.debug("Creating Leaving Soon for TV shows older than ${seasonLeavingSoonExpiration.toDays()}")
-        val movieLeavingSoooExpiration = determineDeletionDuration(applicationProperties.mediaDeletion.movieExpiration, leavingSoonFreeSpacePercentage)
-        log.debug("Creating Leaving Soon for movies older than ${movieLeavingSoooExpiration.toDays()}")
+        val movieLeavingSoonExpiration = determineDeletionDuration(applicationProperties.mediaDeletion.movieExpiration, leavingSoonFreeSpacePercentage)
+        log.debug("Creating Leaving Soon for movies older than ${movieLeavingSoonExpiration.toDays()}")
 
         scheduleDelete(TV_SHOWS, seasonExpiration, seasonLeavingSoonExpiration)
-        scheduleDelete(MOVIES, movieExpiration, movieLeavingSoooExpiration)
+        scheduleDelete(MOVIES, movieExpiration, movieLeavingSoonExpiration)
 
     }
 
