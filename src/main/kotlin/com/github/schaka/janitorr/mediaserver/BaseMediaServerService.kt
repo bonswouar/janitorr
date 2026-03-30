@@ -102,9 +102,7 @@ abstract class BaseMediaServerService(
     private fun getMediaServerIdsForTvShowIds(items: List<LibraryItem>, bySeason: Boolean = true): Map<MediaLookup, List<String>> {
 
         // Do we need to aggregate by season or give every episode/season the entire TV show ID?
-        val useSeason = !applicationProperties.wholeTvShow && bySeason
-
-        val mediaServerShows = getTvLibrary(useSeason)
+        val mediaServerShows = getTvLibrary(bySeason)
 
         // it's not worth caching the showId => mediaServerIds lookup directly, it gets called too rarely, and we need to iterate the entire library to fill the cache manually anyway
         return items

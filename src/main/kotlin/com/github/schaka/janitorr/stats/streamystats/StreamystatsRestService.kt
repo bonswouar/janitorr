@@ -27,11 +27,12 @@ class StreamystatsRestService(
         // if WatchHistory settings require a different way of aggregating MediaServerIds, request them again
         // TODO: if at all possible, we shouldn't populate the list of media server ids differently, but recognize a season and treat show as a whole as per application properties
         // example: grab show id for season id, get WatchHistory based on show instead of season
-        val libraryMappings = mediaServerService.getMediaServerIdsForLibrary(items, type, !streamystatsProperties.wholeTvShow)
+        val bySeason = if (applicationProperties.wholeTvShow) false else !streamystatsProperties.wholeTvShow
+        val libraryMappings = mediaServerService.getMediaServerIdsForLibrary(items, type, bySeason)
 
         for (item in items) {
             // every movie, show, season and episode has its own unique ID, so every request will only consider what's passed to it here
-            val lookupKey = if (type == LibraryType.TV_SHOWS && !streamystatsProperties.wholeTvShow) MediaLookup(item.id, item.season) else MediaLookup(item.id)
+            val lookupKey = if (type == LibraryType.TV_SHOWS && bySeason) MediaLookup(item.id, item.season) else MediaLookup(item.id)
             val response = libraryMappings.getOrDefault(lookupKey, listOf())
                 .map(::gracefulQuery)
 
