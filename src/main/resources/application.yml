@@ -11,6 +11,9 @@ spring:
       enabled: true
 
 logging:
+  level:
+    com.github.schaka: INFO
+    feign.Logger: DEBUG
   logback:
     rollingpolicy:
       max-history: 14
@@ -21,6 +24,7 @@ clients:
   default:
     connect-timeout: 60s
     read-timeout: 60s
+    level: NONE
 
   sonarr:
     enabled: false

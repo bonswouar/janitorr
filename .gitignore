@@ -24,6 +24,9 @@ out/
 .DS_Store
 **/.DS_Store
 
+# AI crap
+.claude
+
 # Local
 application-local.yml
 application-seedbox.yml

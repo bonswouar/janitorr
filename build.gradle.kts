@@ -8,7 +8,6 @@ import org.springframework.boot.gradle.tasks.aot.ProcessAot
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.springframework.boot.gradle.tasks.run.BootRun
-import org.gradle.api.tasks.bundling.Jar
 
 plugins {
 
@@ -40,9 +39,11 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
-    implementation("io.github.openfeign:feign-core:13.6")
-    implementation("io.github.openfeign:feign-jackson:13.6")
-    implementation("io.github.openfeign:feign-httpclient:13.6")
+    implementation("io.github.openfeign:feign-core:13.11")
+    implementation("io.github.openfeign:feign-jackson3:13.11")
+    implementation("io.github.openfeign:feign-jaxb-jakarta:13.11")
+    implementation("io.github.openfeign:feign-httpclient:13.11")
+    implementation("io.github.openfeign:feign-slf4j:13.11")
 
     implementation("org.slf4j:jcl-over-slf4j")
 

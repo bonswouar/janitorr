@@ -60,6 +60,11 @@ application:
 
 
 clients:
+  default:
+    connect-timeout: 60s
+    read-timeout: 60s
+    level: NONE # If set to FULL, will log all data of requests Janitorr sends out
+
   sonarr:
     enabled: true
     url: "http://localhost:8989"

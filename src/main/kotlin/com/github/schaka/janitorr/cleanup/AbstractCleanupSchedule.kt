@@ -48,6 +48,7 @@ abstract class AbstractCleanupSchedule(
 
         if (leavingSoonExpiration != FOREVER.duration) {
             log.info("Not deleting ${libraryType.collectionType} because minimum disk threshold was not reached, but updating Leaving Soon.")
+            mediaServerService.getMediaServerIdsForLibrary(listOf(), LibraryType.TV_SHOWS, true)
             if (fileSystemProperties.access) {
                 log.info("Free disk space: ${getFreeSpacePercentage()}%")
             }
