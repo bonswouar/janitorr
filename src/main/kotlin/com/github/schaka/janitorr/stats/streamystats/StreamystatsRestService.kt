@@ -34,10 +34,10 @@ class StreamystatsRestService(
 
             var (watchHistory, response) = queryStreamystats(resolved.ids)
 
-            if (watchHistory == null && resolved.fallbackIds.isNotEmpty()) {
+            if (bySeason && watchHistory == null && resolved.fallbackIds.isNotEmpty()) {
                 log.debug("No watch history via season IDs for {} (season {}), falling back to show-level IDs", item.id, item.season)
                 val (fallbackWatch, fallbackResponse) = if (streamystatsProperties.seasonFallback) {
-                    queryStreamystatsWithSeasonFallback(resolved.fallbackIds, item.season)
+                    queryStreamystatsWithSeasonFallback(resolved.fallbackIds, item.season!!)
                 } else {
                     queryStreamystats(resolved.fallbackIds, seasonIdFilter = resolved.ids.toSet())
                 }
