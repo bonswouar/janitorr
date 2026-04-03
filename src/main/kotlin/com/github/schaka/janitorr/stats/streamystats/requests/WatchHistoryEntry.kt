@@ -7,5 +7,6 @@ data class WatchHistoryEntry(
     val watchDate: String,
     val playMethod: String,
     val deviceName: String,
-    val clientName: String
+    val clientName: String,
+    val seasonId: String?,
 )

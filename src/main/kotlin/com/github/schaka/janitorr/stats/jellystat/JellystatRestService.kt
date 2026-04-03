@@ -35,7 +35,11 @@ class JellystatRestService(
 
             if (watchHistory == null && resolved.fallbackIds.isNotEmpty()) {
                 log.debug("No watch history via season IDs for {} (season {}), falling back to show-level IDs", item.id, item.season)
-                watchHistory = queryJellystat(resolved.fallbackIds, seasonIdFilter = resolved.ids.toSet())
+                watchHistory = if (jellystatProperties.seasonFallback) {
+                    queryJellystat(resolved.fallbackIds, seasonNumber = item.season)
+                } else {
+                    queryJellystat(resolved.fallbackIds, seasonIdFilter = resolved.ids.toSet())
+                }
             }
 
             if (watchHistory != null) {
@@ -45,13 +49,14 @@ class JellystatRestService(
         }
     }
 
-    private fun queryJellystat(jellyfinIds: List<String>, seasonIdFilter: Set<String>? = null): JellyStatHistoryResponse? {
+    private fun queryJellystat(jellyfinIds: List<String>, seasonIdFilter: Set<String>? = null, seasonNumber: Int? = null): JellyStatHistoryResponse? {
         return jellyfinIds
             .map(::JellystatItemRequest)
             .map(jellystatClient::getRequests)
             .flatMap { page -> page.results }
             .filter { it.PlaybackDuration > 60 }
             .filter { seasonIdFilter == null || (it.SeasonId != null && it.SeasonId in seasonIdFilter) }
+            .filter { seasonNumber == null || it.SeasonNumber == seasonNumber }
             .maxByOrNull { toDate(it.ActivityDateInserted) }
     }
 

@@ -9,4 +9,5 @@ data class JellystatProperties(
         override val url: String,
         override val wholeTvShow: Boolean = false,
         val apiKey: String,
+        val seasonFallback: Boolean = false,
 ) : StatsClientProperties

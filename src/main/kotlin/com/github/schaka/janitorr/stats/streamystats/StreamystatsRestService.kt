@@ -36,7 +36,11 @@ class StreamystatsRestService(
 
             if (watchHistory == null && resolved.fallbackIds.isNotEmpty()) {
                 log.debug("No watch history via season IDs for {} (season {}), falling back to show-level IDs", item.id, item.season)
-                val (fallbackWatch, fallbackResponse) = queryStreamystats(resolved.fallbackIds, seasonIdFilter = resolved.ids.toSet())
+                val (fallbackWatch, fallbackResponse) = if (streamystatsProperties.seasonFallback) {
+                    queryStreamystatsWithSeasonFallback(resolved.fallbackIds, item.season)
+                } else {
+                    queryStreamystats(resolved.fallbackIds, seasonIdFilter = resolved.ids.toSet())
+                }
                 watchHistory = fallbackWatch
                 response = fallbackResponse
             }
@@ -58,6 +62,30 @@ class StreamystatsRestService(
             .filter { it.watchDuration > 60 }
             .maxByOrNull { toDate(it.watchDate) }
         return watchHistory to firstResponse
+    }
+
+    private fun queryStreamystatsWithSeasonFallback(showIds: List<String>, targetSeason: Int): Pair<WatchHistoryEntry?, StreamystatsHistoryResponse?> {
+        val showResponses = showIds.mapNotNull(::gracefulQuery)
+
+        val candidateSeasonIds = showResponses
+            .flatMap { it.watchHistory }
+            .mapNotNull { it.seasonId }
+            .distinct()
+
+        val matchingSeasonResponse = candidateSeasonIds
+            .mapNotNull(::gracefulQuery)
+            .firstOrNull { it.item.indexNumber == targetSeason }
+            ?: return null to null
+
+        val matchingSeasonId = matchingSeasonResponse.item.id
+
+        val watchEntry = showResponses
+            .filter { it.lastWatched != null }
+            .flatMap { it.watchHistory }
+            .filter { it.seasonId == matchingSeasonId && it.watchDuration > 60 }
+            .maxByOrNull { toDate(it.watchDate) }
+
+        return watchEntry to matchingSeasonResponse
     }
 
     private fun gracefulQuery(jellyfinId: String): StreamystatsHistoryResponse? {

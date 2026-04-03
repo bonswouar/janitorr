@@ -10,4 +10,5 @@ data class WatchHistoryItem(
     val seasonId: String?,
     val seriesName: String?,
     val seasonName: String?,
+    val indexNumber: Int?,
 )

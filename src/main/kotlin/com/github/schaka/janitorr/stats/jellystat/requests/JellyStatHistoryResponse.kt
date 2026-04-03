@@ -6,6 +6,7 @@ data class JellyStatHistoryResponse(
         val NowPlayingItemName: String?,
         val PlaybackDuration: Int, // Seconds
         val SeasonId: String?,
+        val SeasonNumber: Int?,
         val SeriesName: String?,
         val UserName: String?,
         val Client: String?,
