@@ -11,6 +11,6 @@ data class LibraryContent(
         val SeasonId: String? = null,
         val SeasonName: String? = null,
         val IndexNumber: Int = 0,
-        val SeriesId: String? = null,
+        var SeriesId: String? = null,
         val SeriesName: String? = null,
 )

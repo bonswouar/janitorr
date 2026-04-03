@@ -6,6 +6,7 @@ import com.github.schaka.janitorr.mediaserver.filesystem.PathStructure
 import com.github.schaka.janitorr.mediaserver.library.LibraryContent
 import com.github.schaka.janitorr.mediaserver.library.LibraryType
 import com.github.schaka.janitorr.mediaserver.lookup.MediaLookup
+import com.github.schaka.janitorr.mediaserver.lookup.ResolvedMediaServerIds
 import com.github.schaka.janitorr.servarr.LibraryItem
 import org.slf4j.LoggerFactory
 import org.springframework.util.FileSystemUtils
@@ -36,6 +37,8 @@ abstract class AbstractMediaServerService {
     abstract fun updateLeavingSoon(cleanupType: CleanupType, libraryType: LibraryType, items: List<LibraryItem>, onlyAddLinks: Boolean = false)
 
     abstract fun getMediaServerIdsForLibrary(items: List<LibraryItem>, type: LibraryType, bySeason: Boolean ): Map<MediaLookup, List<String>>
+
+    abstract fun getMediaServerIdsForLibraryWithFallback(items: List<LibraryItem>, type: LibraryType, bySeason: Boolean): Map<MediaLookup, ResolvedMediaServerIds>
 
     abstract fun getAllFavoritedItems(): List<LibraryContent>
 

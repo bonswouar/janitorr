@@ -4,6 +4,7 @@ import com.github.schaka.janitorr.config.ApplicationProperties
 import com.github.schaka.janitorr.mediaserver.AbstractMediaServerService
 import com.github.schaka.janitorr.mediaserver.library.LibraryType
 import com.github.schaka.janitorr.mediaserver.lookup.MediaLookup
+import com.github.schaka.janitorr.mediaserver.lookup.ResolvedMediaServerIds
 import com.github.schaka.janitorr.servarr.LibraryItem
 import com.github.schaka.janitorr.stats.StatsService
 import com.github.schaka.janitorr.stats.jellystat.requests.JellyStatHistoryResponse
@@ -23,28 +24,35 @@ class JellystatRestService(
     }
 
     override fun populateWatchHistory(items: List<LibraryItem>, type: LibraryType) {
-
-        // TODO: if at all possible, we shouldn't populate the list of media server ids differently, but recognize a season and treat show as a whole as per application properties
-        // example: grab show id for season id, get WatchHistory based on show instead of season
         val bySeason = if (applicationProperties.wholeTvShow) false else !jellystatProperties.wholeTvShow
-        val libraryMappings = mediaServerService.getMediaServerIdsForLibrary(items, type, bySeason)
+        val libraryMappings = mediaServerService.getMediaServerIdsForLibraryWithFallback(items, type, bySeason)
 
         for (item in items) {
-            // every movie, show, season and episode has its own unique ID, so every request will only consider what's passed to it here
             val lookupKey = if (type == LibraryType.TV_SHOWS && bySeason) MediaLookup(item.id, item.season) else MediaLookup(item.id)
-            val watchHistory = libraryMappings.getOrDefault(lookupKey, listOf())
-                .map(::JellystatItemRequest)
-                .map(jellystatClient::getRequests)
-                .flatMap { page -> page.results }
-                .filter { it.PlaybackDuration > 60 }
-                .maxByOrNull { toDate(it.ActivityDateInserted) } // most recent date
+            val resolved = libraryMappings.getOrDefault(lookupKey, ResolvedMediaServerIds(emptyList()))
 
-            // only count view if at least one minute of content was watched - could be user adjustable later
+            var watchHistory = queryJellystat(resolved.ids)
+
+            if (watchHistory == null && resolved.fallbackIds.isNotEmpty()) {
+                log.debug("No watch history via season IDs for {} (season {}), falling back to show-level IDs", item.id, item.season)
+                watchHistory = queryJellystat(resolved.fallbackIds, seasonIdFilter = resolved.ids.toSet())
+            }
+
             if (watchHistory != null) {
                 item.lastSeen = toDate(watchHistory.ActivityDateInserted)
                 logWatchInfo(item, watchHistory)
             }
         }
+    }
+
+    private fun queryJellystat(jellyfinIds: List<String>, seasonIdFilter: Set<String>? = null): JellyStatHistoryResponse? {
+        return jellyfinIds
+            .map(::JellystatItemRequest)
+            .map(jellystatClient::getRequests)
+            .flatMap { page -> page.results }
+            .filter { it.PlaybackDuration > 60 }
+            .filter { seasonIdFilter == null || (it.SeasonId != null && it.SeasonId in seasonIdFilter) }
+            .maxByOrNull { toDate(it.ActivityDateInserted) }
     }
 
     private fun logWatchInfo(item: LibraryItem, watchHistory: JellyStatHistoryResponse?) {

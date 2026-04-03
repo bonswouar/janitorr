@@ -5,6 +5,7 @@ import com.github.schaka.janitorr.mediaserver.AbstractMediaServerService
 import com.github.schaka.janitorr.mediaserver.library.LibraryContent
 import com.github.schaka.janitorr.mediaserver.library.LibraryType
 import com.github.schaka.janitorr.mediaserver.lookup.MediaLookup
+import com.github.schaka.janitorr.mediaserver.lookup.ResolvedMediaServerIds
 import com.github.schaka.janitorr.servarr.LibraryItem
 import org.slf4j.LoggerFactory
 
@@ -42,6 +43,15 @@ class MediaServerNoOpService : AbstractMediaServerService() {
         type: LibraryType,
         bySeason: Boolean
     ): Map<MediaLookup, List<String>> {
+        log.info("Media Server not implemented. No mediaServerIds populated.")
+        return mapOf()
+    }
+
+    override fun getMediaServerIdsForLibraryWithFallback(
+        items: List<LibraryItem>,
+        type: LibraryType,
+        bySeason: Boolean
+    ): Map<MediaLookup, ResolvedMediaServerIds> {
         log.info("Media Server not implemented. No mediaServerIds populated.")
         return mapOf()
     }

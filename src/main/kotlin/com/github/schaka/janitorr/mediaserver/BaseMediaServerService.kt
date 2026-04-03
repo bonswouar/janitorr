@@ -9,6 +9,7 @@ import com.github.schaka.janitorr.mediaserver.library.LibraryType.MOVIES
 import com.github.schaka.janitorr.mediaserver.library.LibraryType.TV_SHOWS
 import com.github.schaka.janitorr.mediaserver.library.VirtualFolderResponse
 import com.github.schaka.janitorr.mediaserver.lookup.MediaLookup
+import com.github.schaka.janitorr.mediaserver.lookup.ResolvedMediaServerIds
 import com.github.schaka.janitorr.servarr.LibraryItem
 import com.github.schaka.janitorr.servarr.bazarr.BazarrPayload
 import com.github.schaka.janitorr.servarr.bazarr.BazarrService
@@ -66,6 +67,13 @@ abstract class BaseMediaServerService(
         }
     }
 
+    override fun getMediaServerIdsForLibraryWithFallback(items: List<LibraryItem>, type: LibraryType, bySeason: Boolean): Map<MediaLookup, ResolvedMediaServerIds> {
+        return when (type) {
+            TV_SHOWS -> getMediaServerIdsForTvShowIdsWithFallback(items, bySeason)
+            MOVIES -> getMediaServerIdsForMovieIds(items).mapValues { (_, ids) -> ResolvedMediaServerIds(ids) }
+        }
+    }
+
     override fun cleanupTvShows(items: List<LibraryItem>) {
 
         if (!mediaServerProperties.delete) {
@@ -112,6 +120,28 @@ abstract class BaseMediaServerService(
                     mediaServerShows
                         .filter { tvShowMatches(show, it, bySeason) }
                         .map { it.Id }
+                }
+            }
+    }
+
+    private fun getMediaServerIdsForTvShowIdsWithFallback(items: List<LibraryItem>, bySeason: Boolean = true): Map<MediaLookup, ResolvedMediaServerIds> {
+        val mediaServerShows = getTvLibrary(bySeason)
+
+        return items
+            .groupBy { show -> lookup(bySeason, show) }
+            .mapValues { (_, showsInGroup) ->
+                val matchedContent = showsInGroup.flatMap { show ->
+                    mediaServerShows.filter { tvShowMatches(show, it, bySeason) }
+                }
+                val primaryIds = matchedContent.map { it.Id }
+
+                if (bySeason) {
+                    val fallbackIds = matchedContent
+                        .mapNotNull { it.SeriesId }
+                        .distinct()
+                    ResolvedMediaServerIds(primaryIds, fallbackIds)
+                } else {
+                    ResolvedMediaServerIds(primaryIds)
                 }
             }
     }

@@ -30,7 +30,10 @@ class MediaServerLibraryQueryService {
         if (bySeason) {
             mediaServerShows = mediaServerShows.flatMap { show ->
                 val seasons = mediaServerClient.getAllSeasons(show.Id).Items
-                seasons.forEach { it.ProviderIds = show.ProviderIds } // we want metadata (IMDB, TMDB) IDs for the entire show to match, not season IDs (only available from TVDB)
+                seasons.forEach {
+                    it.ProviderIds = show.ProviderIds // we want metadata (IMDB, TMDB) IDs for the entire show to match, not season IDs (only available from TVDB)
+                    it.SeriesId = it.SeriesId ?: show.Id // ensure SeriesId is always set for fallback lookups
+                }
                 return@flatMap seasons
             }
         }
